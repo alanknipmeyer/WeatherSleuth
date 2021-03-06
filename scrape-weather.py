@@ -1,3 +1,12 @@
+
+# Author - Alan Knipmeyer, provided free without warranty on the MIT license
+"""
+Copyright (c) 2021, Alan Knipmeyer
+All rights reserved.
+This source code is licensed under the MIT license found in the
+LICENSE file in the root directory of this source tree. 
+"""
+
 # import libraries
 from bs4 import BeautifulSoup
 import requests
@@ -6,16 +15,6 @@ from datetime import datetime,timedelta
 import os
 #import psycopg2
 
-"""
-
-# Author - Alan Knipmeyer, provided free without warranty on the MIT license
-
-"""
-Copyright (c) 2021, Alan Knipmeyer
-All rights reserved.
-This source code is licensed under the MIT license found in the
-LICENSE file in the root directory of this source tree. 
-"""
 
 # one big function currently
 def getweather(URL):
