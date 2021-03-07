@@ -15,6 +15,7 @@ Python Packages
  - bs4
  - requests
  - os
+ - psycopg2
 
 Aercus Instruments Wireless Weather Station WeatherSleuth
 
@@ -80,3 +81,67 @@ Whereby it will loop around scraping stats from the weathersluthe server
     rainofyearly - float value of amount of rain collected in mm in the current year from external device
 ```
 This allows to bolt on other modules (pandas/postgres,etc) to use the values as you please.
+
+## Added Database Section
+
+Using Postgres
+
+As postgres user
+```
+su - postgres
+psql
+create database weather;
+create user weather with encrypted password 'myreallystrongpassword';
+grant all privileges on database weather to weather;
+\q
+```
+Create the weather local user
+
+```
+sudo bash
+useradd weather
+mkdir /home/weather
+chown -R weather:weather /home/weather
+```
+
+Create Table
+
+```
+psql
+create table weather (
+   timestamp varchar(20),
+   intemp real,
+   inhumi real, 
+   abspress real,
+   relpress real,
+   outtemp real,
+   outhumi real,
+   windir real,
+   windspeed real,
+   gustspeed real,
+   solarrad real,
+   uv real,
+   uvi real,
+   rainhourly real,
+   rainweekly real,
+   rainmonthly real,
+   rainyearly real
+);
+\q
+```
+
+Modify connection info in ```# DB Section``` to reflect username/password/host.
+
+## DB Output
+After intial run one entry will be insert, then every 5 minutes data scraped from the WebUI inserted into the DB.
+
+```
+weather=> select * from weather;
+   timestamp    | intemp | inhumi | abspress | relpress | outtemp | outhumi | windir | windspeed | gustspeed | solarrad | uv  | uvi | rainhourly | rainweekly | rainmonthly | rainyearly 
+----------------+--------+--------+----------+----------+---------+---------+--------+-----------+-----------+----------+-----+-----+------------+------------+-------------+------------
+ 09:04 3/7/2021 |   23.3 |     36 |   1028.7 |   1017.1 |     3.3 |      68 |     68 |         0 |         0 |   107.49 | 266 |   1 |          0 |          0 |         2.7 |       22.2
+ 09:08 3/7/2021 |   23.4 |     36 |   1028.7 |   1017.1 |     3.5 |      66 |    221 |         0 |         0 |   114.18 | 279 |   1 |          0 |          0 |         2.7 |       22.2
+ 09:13 3/7/2021 |   23.4 |     35 |   1029.1 |   1017.5 |     3.6 |      63 |    209 |         0 |         0 |   103.96 | 270 |   1 |          0 |          0 |         2.7 |       22.2
+ 09:18 3/7/2021 |   23.5 |     36 |   1028.6 |     1017 |     3.8 |      65 |    233 |         0 |         0 |   108.11 | 282 |   1 |          0 |          0 |         2.7 |       22.2
+(4 rows)
+```
