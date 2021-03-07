@@ -7,15 +7,6 @@ This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree. 
 """
 
-# import libraries
-from bs4 import BeautifulSoup
-import requests
-import time
-from datetime import datetime,timedelta
-import os
-#import psycopg2
-
-
 # one big function currently
 def getweather(URL):
     """Gets weatherdata via http
@@ -59,7 +50,7 @@ def getweather(URL):
     RelPress = soup.find('input',{'name':'RelPress'})['value']
     outTemp = soup.find('input',{'name':'outTemp'})['value']
     outHumi = soup.find('input',{'name':'outHumi'})['value']
-    windir = soup.find('input',{'name':'outHumi'})['value']
+    windir = soup.find('input',{'name':'windir'})['value']
     windspeed = soup.find('input',{'name':'windspeed'})['value']
     gustspeed = soup.find('input',{'name':'gustspeed'})['value']
     solarrad = soup.find('input',{'name':'solarrad'})['value']
@@ -69,6 +60,35 @@ def getweather(URL):
     rainofweekly = soup.find('input',{'name':'rainofweekly'})['value']
     rainofmonthly = soup.find('input',{'name':'rainofmonthly'})['value']
     rainofyearly = soup.find('input',{'name':'rainofyearly'})['value']
+
+    # DB Section
+
+    try:
+        conn = psycopg2.connect(
+            user="weather",
+            password="<yourreallystrongpassword>",
+            host="<postgresserverip>",
+            port=5432,
+            database="weather"
+           )
+        conn.autocommit = True
+
+        cur = conn.cursor()
+        print ("Connected to database!")
+        conn.commit()
+        print ("Inserting weather data into weather table....")
+        insert_stmt = 'INSERT INTO weather (timestamp, InTemp, InHumi, AbsPress, RelPress, outTemp, outHumi, windir, windspeed, gustspeed, solarrad, UV, UVI, rainhourly, rainweekly, rainmonthly, rainyearly ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING'
+        val = (CurrTime, InTemp, InHumi, AbsPress, RelPress, outTemp, outHumi, windir, windspeed, gustspeed, solarrad, UV, UVI, rainofhourly, rainofweekly, rainofmonthly, rainofyearly)
+        cur.execute(insert_stmt,val)
+
+
+    except psycopg2.Error as e:
+        print(f"Error connecting to Postgres Platform: {e}")
+    except Exception as e:
+        print("Exception in _query: %s" % e)
+    finally:
+        if conn:
+            conn.close()
 
     # output values
     print ( "\n",
@@ -95,7 +115,7 @@ def getweather(URL):
 
 #globals
 # URL to curl values from, pull the max
-URL="http://YOURWEATHERSLUTHEIP/livedata.htm"
+URL="http://<weathersleuthip>/livedata.htm"
 # call functions
 while 1==1:
     getweather(URL)
